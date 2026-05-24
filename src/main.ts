@@ -107,7 +107,8 @@ class TsukamotoFISPathfinding{
 
       if(idx_t >=  target.length){
         const pembilang = accumulator;
-        const penyebut = ((target.length === 1) ? 0 : target.length -1);
+        //penyebut harus lebih atau samadengan 1
+        const penyebut = target.length -1 || 1;
         const average = pembilang/penyebut;
 
         return Object.preventExtensions({
@@ -156,6 +157,11 @@ class TsukamotoFISPathfinding{
       for(const rule of rules){
         total_fire_strength += rule.fireStrength;
         ztimefirestrength += rule.fireStrength * rule.out_membership(rule.fireStrength);
+      }
+
+      if(total_fire_strength === 0){
+        pack.crisp_out = 50;
+        continue;
       }
 
       pack.crisp_out = ztimefirestrength / total_fire_strength;
