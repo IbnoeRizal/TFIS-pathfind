@@ -1,0 +1,27 @@
+{
+  "name": "pathsearchingfis",
+  "version": "1.0.0",
+  "description": "implementation of fis tsukamoto in file searching",
+  "main": "./src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx ./src/main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "search",
+    "FIS",
+    "Tsukamoto",
+    "file",
+    "System",
+    "search",
+    "recursive",
+    "search"
+  ],
+  "author": "IbnoeRizal",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3"
+  }
+}
