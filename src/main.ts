@@ -37,7 +37,7 @@ class TsukamotoFISPathfinding{
 
   constructor(pathroot?:string, exclude?:Array<string>){
     this.pathRoot = pathroot ?? './';
-    this.exclude = new Set(exclude ?? ["node_modules", ".git", ".dist", "cache"]);
+    this.exclude = new Set(exclude ?? ["node_modules", ".git", ".dist", "cache",".venv","dist"]);
   }
 
 
