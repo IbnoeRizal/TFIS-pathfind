@@ -198,8 +198,28 @@ class TsukamotoFISPathfinding{
     return this;
   }
 
-  public getpathlist(){
-    return this.pathlist.map(x=>x.path);
+  public getpathlist(option?:{from:number,to:number}){
+    let paths = this.pathlist.map(x=>x.path);
+
+    function anti_bufferoverflow(x:number){
+      return Math.max(0,Math.min(x,paths.length));
+    }
+
+
+    if(option){
+      if(option.from > option.to){
+        const a = option.to;
+        option.to = option.from;
+        option.from = a;
+      }
+
+      option.from = anti_bufferoverflow(option.from);
+      option.to = anti_bufferoverflow(option.to)
+      return paths.slice(option.from,option.to);
+    }
+
+    return paths;
+
   }
 
   public getcopy(){
@@ -207,5 +227,5 @@ class TsukamotoFISPathfinding{
   }
 }
 
-const obj = new TsukamotoFISPathfinding();
-(await obj.listFilesParallel("Jso")).implication().defuzzyfication().ranking().getpathlist().forEach(x=>console.log(x));
+const obj = new TsukamotoFISPathfinding("./");
+(await obj.listFilesParallel("main")).implication().defuzzyfication().ranking().getpathlist({from:0,to:5}).forEach(x=>console.log(x));
