@@ -125,17 +125,35 @@ class TsukamotoFISPathfinding{
     for(const pack of this.pathlist){
       const nilai = pack.kemiripan;
 
-      const rule1 = Math.min(...Object.values(nilai));
-      const rule2 = Math.min(...Object.values(nilai).map(x=>1-x));
-  
-      const rules = [
+      // fuzzy value dari masing-masing membersip function
+      const tinggi = nilai;
+      const rendah = structuredClone(nilai);
+
+      for(const key of Object.keys(rendah) as (keyof typeof rendah)[]){
+        rendah[key] = 1 - rendah[key];
+      }
+
+
+      const rules:Rules = [
         {
-          fireStrength : rule1,
-          out_membership : TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
+          //jarakAntarKarakter=rendah dan kesamaanHurufbesarkecil=tinggi dan proporsiTargetbandingInput=tinggi(tinggi artinya hampir sama)
+          fireStrength: Math.min(rendah.Norm_avg_jarak_char,tinggi.case_similarity,tinggi.Proporsi_target_input),
+          out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
         },
         {
-          fireStrength: rule2,
-          out_membership : TsukamotoFISPathfinding.out_membershipfx_akurasi.rendah
+          //jarakAntarKarakter=tinggi dan kesamaanHurufbesarkecil=rendah dan proporsiTargetbandingInput=rendah(rendah artinya targetInput lebih kecil)
+          fireStrength: Math.min(tinggi.Norm_avg_jarak_char,rendah.case_similarity,rendah.Proporsi_target_input),
+          out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.rendah
+        },
+        {
+          //jarakAntarKarakter=rendah atau proporsiTargetbandingInput=tinggi(tinggi artinya hampir sama)
+          fireStrength:Math.max(rendah.Norm_avg_jarak_char,tinggi.Proporsi_target_input),
+          out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
+        },
+        {
+          //jarakAntarKarakter=rendah dan kesamaanHurufbesarkecil=rendah dan proporsiTargetbandingInput=rendah(rendah artinya targetInput lebih kecil)
+          fireStrength:Math.min(tinggi.Norm_avg_jarak_char,rendah.case_similarity,rendah.Proporsi_target_input),
+          out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.rendah
         }
       ];
 
