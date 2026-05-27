@@ -14,14 +14,14 @@ interface Rule{
 
 type Rules = Array<Rule>;
 
-interface Packed{
+export interface Packed{
   path:string,
   kemiripan : Kemiripan,
   rules?: Rules,
   crisp_out?:number
 }
 
-class TsukamotoFISPathfinding{
+export class TsukamotoFISPathfinding{
   private pathRoot:string;
   private exclude: Set<string>;
   private pathlist!:Packed[];
@@ -150,11 +150,6 @@ class TsukamotoFISPathfinding{
           fireStrength:Math.max(rendah.Norm_avg_jarak_char,tinggi.Proporsi_target_input),
           out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
         },
-        {
-          //jarakAntarKarakter=rendah dan kesamaanHurufbesarkecil=rendah dan proporsiTargetbandingInput=rendah(rendah artinya targetInput lebih kecil)
-          fireStrength:Math.min(tinggi.Norm_avg_jarak_char,rendah.case_similarity,rendah.Proporsi_target_input),
-          out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.rendah
-        }
       ];
 
       pack.rules = rules;
@@ -226,6 +221,3 @@ class TsukamotoFISPathfinding{
     return structuredClone(this.pathlist);
   }
 }
-
-const obj = new TsukamotoFISPathfinding("./");
-(await obj.listFilesParallel("main")).implication().defuzzyfication().ranking().getpathlist({from:0,to:5}).forEach(x=>console.log(x));
