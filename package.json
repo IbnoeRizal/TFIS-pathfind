@@ -5,7 +5,8 @@
   "main": "./src/main.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx ./src/main.ts",
+    "dev": "dotenv -v DEV=true -- tsx --watch-path src/ ./src/main.tsx",
+    "dev:tools": "react-devtools",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,7 +22,20 @@
   "author": "IbnoeRizal",
   "license": "MIT",
   "devDependencies": {
+    "@types/ink": "^0.5.2",
     "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "dotenv-cli": "^11.0.0",
+    "react-devtools": "^7.0.1",
     "tsx": "^4.22.3"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "ink": "^7.0.3",
+    "ink-scroll-list": "^0.4.1",
+    "react": "^19.2.6"
+  },
+  "optionalDependencies": {
+    "react-devtools-core": "^7.0.1"
   }
 }
