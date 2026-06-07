@@ -5,6 +5,7 @@ interface Kemiripan{
   Norm_avg_jarak_char : number;
   Proporsi_target_input : number;
   case_similarity : number;
+  matched_idx: number[]
 }
 
 interface Rule{
@@ -14,12 +15,14 @@ interface Rule{
 
 type Rules = Array<Rule>;
 
-export interface Packed{
+interface Packed{
   path:string,
   kemiripan : Kemiripan,
   rules?: Rules,
   crisp_out?:number
 }
+
+export type PackedOutRules = Omit<Packed,"rules">;
 
 export class TsukamotoFISPathfinding{
   private pathRoot:string;
@@ -81,49 +84,38 @@ export class TsukamotoFISPathfinding{
 
     if(!(typeof contain === typeof target && typeof contain === 'string')) return null;
     if(contain.length === 0 || target.length === 0) return null;
-
-    let idx_c= 0;
-    let idx_t = 0;
-    let last_c = 0;
-
+    
+    const matched_target_idx = TsukamotoFISPathfinding.matchup(target,contain);
+    if(matched_target_idx.length < target.length) return null;
+    
     let accumulator = 0;
     let similar_case = 0;
     const MaxDistance = contain.length - (target.length - 1);
-
-    while(idx_c < contain.length){
-
-      let t = target[idx_t];
-      let c = contain[idx_c];
-
-      t === c && similar_case++;
-
-      if(t?.toLowerCase() === c?.toLowerCase()) {
-        accumulator += (idx_t === 0) ? 0 : (idx_c + 1) - (last_c + 1);
-        ++idx_t
-        last_c = idx_c;        
-      };
-
-      ++idx_c;
-
-      if(idx_t >=  target.length){
-        const pembilang = accumulator;
-        //penyebut harus lebih atau samadengan 1
-        const penyebut = target.length -1 || 1;
-        const average = pembilang/penyebut;
-
-        return Object.preventExtensions({
-          Norm_avg_jarak_char : 1 - average/MaxDistance,
-          Proporsi_target_input : target.length / contain.length,
-          case_similarity : similar_case/target.length
-        });
-      }
+    for(const key of matched_target_idx.keys()){
+      const curridx = matched_target_idx[key]!;
+      target[curridx] === contain[curridx] && similar_case++;
+      if(key === 0) continue;
+      const previdx = matched_target_idx[key-1]!;
+      accumulator += curridx - previdx;
     }
-    return null;
+
+    const pembilang = accumulator;
+    //penyebut harus lebih atau samadengan 1
+    const penyebut = target.length -1 || 1;
+    const average = pembilang/penyebut;
+    const matchedlen = (matched_target_idx.at(-1)! - matched_target_idx.at(0)!);
+
+    return Object.preventExtensions({
+      Norm_avg_jarak_char : 1 - average/MaxDistance,
+      Proporsi_target_input : target.length / Math.max(1,matchedlen),
+      case_similarity : similar_case/target.length,
+      matched_idx : matched_target_idx
+    });
   }
 
   public implication():TsukamotoFISPathfinding{
     for(const pack of this.pathlist){
-      const nilai = pack.kemiripan;
+      const {matched_idx,...nilai} = (pack.kemiripan);
 
       // fuzzy value dari masing-masing membersip function
       const tinggi = nilai;
@@ -218,6 +210,49 @@ export class TsukamotoFISPathfinding{
   }
 
   public getcopy(){
-    return structuredClone(this.pathlist);
+    return this.pathlist.map(({rules,...rest})=>structuredClone(rest));
+  }
+
+  private static matchup(target:string, raw:string): number[]{
+    let container:number[][] = [[]];
+
+    target = target.toLowerCase();
+    raw = raw.toLowerCase();
+
+    for(let i = 0; i < raw.length; i++){
+      let lastmatch = 0;
+
+      for(let j = 0; j < container.length; j++){
+        const item = container[j];
+        const itemIdx = item?.length;
+        
+        if(item == null || itemIdx == target.length) continue;
+        if(target[itemIdx!] != raw[i]) continue;
+        item.push(i);
+
+        if(!j || item.length < container[lastmatch]!.length) continue;
+        const lastitem = container[lastmatch];
+
+        const itemlen = (item.at(-1)?? 0) - (item.at(0)?? 0);
+        const lastmatchlen = (lastitem?.at(-1) ?? 0) - (lastitem?.at(0) ?? 0);
+        lastmatch = j;
+
+        if(lastmatchlen < itemlen){
+          container[j] = container[lastmatch]!;
+        }       
+      }
+
+      if(lastmatch != 0){
+        container = container.slice(lastmatch);
+        lastmatch = 0;
+      }
+
+      if(target[0] != raw[i]) continue;
+      const last = container.at(-1);
+      last?.length === 1? last[0] = i : container.push([i]);
+      
+    }
+
+    return container[0]!;
   }
 }
