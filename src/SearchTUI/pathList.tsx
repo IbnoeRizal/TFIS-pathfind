@@ -6,6 +6,7 @@ import {
     Box,
     Text, 
     useInput,
+    Spacer
 } from "ink";
 import { 
     useRef,
@@ -13,7 +14,7 @@ import {
     useEffect,
 } from "react";
 
-import {type Packed, TsukamotoFISPathfinding } from "../classes/TFIS.js";
+import {type PackedOutRules, TsukamotoFISPathfinding } from "../classes/TFIS.js";
 
 import { useQuery } from "../context/querycontext.js";
 
@@ -22,7 +23,7 @@ export default function PathList(){
     const query = useQuery();
 
     const [error,setError] = useState("no Error");
-    const [pathList,setPathlist] = useState<Packed[] | string[] | []>([]);
+    const [pathList,setPathlist] = useState<PackedOutRules[] | string[] | []>([]);
     const [selectedIndex, setIndex] = useState(0);
 
     useEffect(()=>{
@@ -34,7 +35,7 @@ export default function PathList(){
 
        (async()=>{
         try {
-            setPathlist((await TFIS.listFilesParallel(query.path,query.base)).implication().defuzzyfication().ranking().getpathlist());
+            setPathlist((await TFIS.listFilesParallel(query.path,query.base)).implication().defuzzyfication().ranking().getcopy());
         } catch (err) {
             const error = err as NodeJS.ErrnoException
             if (error.code === 'ENOENT') {
@@ -71,20 +72,48 @@ export default function PathList(){
         <Box 
             height={"70%"} 
             flexDirection="column" 
-            borderBottom={false}
-            borderTop={false}
-            borderColor={"yellow"}
-            borderStyle={"single"}
         >
+            <Box borderTop={false} borderStyle={"single"} borderColor={"yellow"}>
+                {error&&
+                <Text color={"red"}>
+                    {error}
+                </Text>}
+            </Box>
             <ScrollList ref={listRef} selectedIndex={selectedIndex}>
-                {pathList.map((item,i)=>(
-                    <Box key={i}>
-                        <Text color={i === selectedIndex ? "green" : "white"}>
-                            {i === selectedIndex ? "> " : "  "}
-                            {typeof item === 'string'? item : item.path}
-                        </Text>
-                    </Box>
-                ))}
+                {pathList.map((item,i)=>{
+                    const isString = typeof item == 'string';
+                    if(isString){
+                        return(
+                        <Box key={i}>
+                            <Text color={i === selectedIndex ? "green" : "gray"} wrap="truncate-middle">
+                                {i === selectedIndex ? "> " : "  "}
+                                { item }
+                            </Text>
+                        </Box>
+                        )
+                    }else{
+                        const matchedidx = new Set(item.kemiripan.matched_idx);
+                        const newpath = item.path.split("").map((char,i)=>matchedidx.has(i)
+                             ? <Text key={i} bold color="yellowBright">{char}</Text>
+                            : <Text key={i}>{char}</Text>
+                        )
+                        const selected = i === selectedIndex;
+                        const rank = item.crisp_out?.toFixed(0);
+
+                        return(
+                           <Box key={i} alignContent="space-between">
+                            <Text color={selected ? "green" : "white"} wrap="truncate-middle">
+                                {i === selectedIndex ? "> " : "  "}
+                                {newpath}
+                            </Text>
+                            <Spacer/>
+                            <Text color={selected ? "green" : "white"}>
+                               {rank}
+                            </Text>
+                        </Box> 
+                        )
+                    }
+                })}
             </ScrollList>
         </Box>
     )
