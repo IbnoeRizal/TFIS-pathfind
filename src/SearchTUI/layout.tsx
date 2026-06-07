@@ -37,11 +37,6 @@ export default function Layout(){
 			borderColor={"yellow"}
 		>
 			<QueryContext value={query}>
-				<Box alignContent="flex-start" width={"80%"} borderStyle={"single"} borderColor={"yellow"}>
-					<Text>
-						{`row * col = ${rows} * ${columns}`}
-					</Text>
-				</Box>
 				<PathList/>
 				<Spacer />
 				<Query setQuery={setQuery}/>
