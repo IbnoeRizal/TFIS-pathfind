@@ -1,4 +1,20 @@
-# How to start
+# TFIS-pathfind
+TFIS is a TUI app that ranks paths (file system) based on the Tsukamoto Fuzzy 
+Inference System. It measures how well a path matches a given pattern.
+
+The system measures:
+1. Proportion of case similarity
+2. Distance between characters in the target path string
+3. Ratio of pattern length to path string length
+
+To navigate between segments, use `hjkl`
+
+- h : left
+- j : down
+- k : up
+- l : right
+
+# Development
 
 requirement :
  - node
@@ -6,9 +22,8 @@ requirement :
  - git
 
 
-## step
+## Step
 
 1. clone this repo  ```git clone [url]```
 2. npm i
 3. npm run dev (development mode)
-
