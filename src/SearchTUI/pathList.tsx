@@ -16,10 +16,10 @@ import {
 import {type PackedOutRules, TsukamotoFISPathfinding } from "../classes/TFIS.js";
 
 import { useQuery } from "../context/querycontext.js";
-import { MOVEMENT } from "../utility/movement.js";
+import { MOVEMENT,graphLayout } from "../utility/movement.js";
 
 
-export default function PathList(){
+export default function PathList({pathListNode}:{pathListNode:graphLayout}){
     const listRef = useRef<ScrollListRef>(null);
     const query = useQuery();
 
@@ -57,16 +57,18 @@ export default function PathList(){
 
      // Handle keyboard navigation in the parent
     useInput((input, key) => {
-        if (key.upArrow) {
+        if(!pathListNode.isActive()) return;
+
+        if (input === MOVEMENT.ATAS) {
             setIndex((prev) => Math.max(prev - 1, 0));
         }
-        if (key.downArrow) {
+        if (input === MOVEMENT.BAWAH) {
             setIndex((prev) => Math.min(prev + 1, pathList.length - 1));
         }
-        if (input === "g") {
+        if (input === MOVEMENT.TOP) {
             setIndex(0); // Jump to first
         }
-        if (input === "G") {
+        if (input === MOVEMENT.BOTTOM) {
             setIndex(pathList.length - 1); // Jump to last
         }
         if (key.return) {
@@ -84,7 +86,7 @@ export default function PathList(){
                     {error}
                 </Text>
             </Box>
-            <ScrollList ref={listRef} selectedIndex={selectedIndex}>
+            <ScrollList ref={listRef} selectedIndex={selectedIndex} backgroundColor={pathListNode.isActive() ? "black" : ""}>
                 {pathList.map((item,i)=>{
                     const isString = typeof item == 'string';
                     if(isString){

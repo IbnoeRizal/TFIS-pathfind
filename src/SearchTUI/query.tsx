@@ -5,11 +5,12 @@ import {
  } from "ink";
 
 import { TextInput } from "@inkjs/ui";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useQuery } from "../context/querycontext.js";
 import { type QueryState } from "../context/querycontext.js";
+import { graphLayout } from "../utility/movement.js";
 
-export default function Query({setQuery}:{setQuery:React.Dispatch<React.SetStateAction<QueryState>>}){
+export default function Query({setQuery,queryNode}:{setQuery:React.Dispatch<React.SetStateAction<QueryState>>,queryNode:graphLayout}){
 
     const query = useQuery();
 	
@@ -21,8 +22,8 @@ export default function Query({setQuery}:{setQuery:React.Dispatch<React.SetState
 		return setQuery(prev=>({...prev,path:newPath}));
 	},[]);
 
-    const { isFocused: isBaseFocused } = useFocus({ id: "base" });
-    const { isFocused: isPathFocused } = useFocus({ id: "path", autoFocus:true });
+    const { isFocused: isBaseFocused } = useFocus({isActive:queryNode.isActive(), id: "base" });
+    const { isFocused: isPathFocused } = useFocus({isActive:queryNode.isActive(), id: "path" });
 
     return(
         <Box 
@@ -31,6 +32,7 @@ export default function Query({setQuery}:{setQuery:React.Dispatch<React.SetState
             borderStyle={"round"}
             borderColor={"yellow"}
 			borderBottom={false}
+			backgroundColor={queryNode.isActive() ? "black" : ""}
 		>
 
 			<Box alignSelf="flex-start" flexGrow={1} width={"40%"}>
