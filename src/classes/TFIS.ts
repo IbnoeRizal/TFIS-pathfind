@@ -39,13 +39,13 @@ export class TsukamotoFISPathfinding{
   })
 
   constructor(pathroot?:string, exclude?:Array<string>){
-    this.pathRoot = pathroot ?? './';
+    this.pathRoot = pathroot?.trim() ?? './';
     this.exclude = new Set(exclude ?? ["node_modules", ".git", ".dist", "cache",".venv","dist"]);
   }
 
 
   public async listFilesParallel(target:string,dir?: string) {
-    dir = dir ?? this.pathRoot;
+    dir = dir?.trim() ?? this.pathRoot;
     async function helper(target:string,dir:string,thisArg:TsukamotoFISPathfinding){
       const entries = await fs.readdir(dir, { withFileTypes: true });
       const pathlist: Array<Packed> = [];
