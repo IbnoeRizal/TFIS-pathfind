@@ -6,7 +6,6 @@ import {
     Box,
     Text, 
     useInput,
-    Spacer
 } from "ink";
 import { 
     useRef,
@@ -17,19 +16,25 @@ import {
 import {type PackedOutRules, TsukamotoFISPathfinding } from "../classes/TFIS.js";
 
 import { useQuery } from "../context/querycontext.js";
+import { MOVEMENT } from "../utility/movement.js";
+
 
 export default function PathList(){
     const listRef = useRef<ScrollListRef>(null);
     const query = useQuery();
 
-    const [error,setError] = useState("no Error");
+    const [error,setError] = useState<string | null>(null);
     const [pathList,setPathlist] = useState<PackedOutRules[] | string[] | []>([]);
     const [selectedIndex, setIndex] = useState(0);
 
     useEffect(()=>{
+        const timer = setTimeout(() => {
+            setError(null);
+        }, 3000);
+
         if(!(query.base && query.path && query.path.length > 0)){
             setError("base path atau query tidak boleh kosong")
-            return;
+            return ()=>clearTimeout(timer);
         };
         const TFIS = new TsukamotoFISPathfinding();
 
@@ -46,6 +51,7 @@ export default function PathList(){
                 setError(`Error lainnya: ${ error.message}`);
             }
         }
+        return () => clearTimeout(timer)
        })();
     },[query.base,query.path]);
 
@@ -73,11 +79,10 @@ export default function PathList(){
             height={"70%"} 
             flexDirection="column" 
         >
-            <Box borderTop={false} borderStyle={"single"} borderColor={"yellow"}>
-                {error&&
+            <Box borderTop={false} backgroundColor={"black"} justifyContent="center" alignItems="center">
                 <Text color={"red"}>
                     {error}
-                </Text>}
+                </Text>
             </Box>
             <ScrollList ref={listRef} selectedIndex={selectedIndex}>
                 {pathList.map((item,i)=>{
@@ -101,12 +106,11 @@ export default function PathList(){
                         const rank = item.crisp_out?.toFixed(0);
 
                         return(
-                           <Box key={i} alignContent="space-between">
+                           <Box key={i} alignItems="center" justifyContent="space-between">
                             <Text color={selected ? "green" : "white"} wrap="truncate-middle">
                                 {i === selectedIndex ? "> " : "  "}
                                 {newpath}
                             </Text>
-                            <Spacer/>
                             <Text color={selected ? "green" : "white"}>
                                {rank}
                             </Text>
