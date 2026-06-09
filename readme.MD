@@ -7,12 +7,22 @@ The system measures:
 2. Distance between characters in the target path string
 3. Ratio of pattern length to path string length
 
-To navigate between segments, use `hjkl`
+To navigate between sections, use `hjkl`
 
 - h : left
 - j : down
 - k : up
 - l : right
+
+To go inside of a section :
+
+- ] : inside
+- [ : outside
+
+To toggle navigation (active/ inactive) :
+
+- ]] : lock
+- [[ : unclock
 
 # Development
 
