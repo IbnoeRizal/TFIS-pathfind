@@ -103,11 +103,11 @@ export class TsukamotoFISPathfinding{
     //penyebut harus lebih atau samadengan 1
     const penyebut = target.length -1 || 1;
     const average = pembilang/penyebut;
-    const matchedlen = (matched_target_idx.at(-1)! - matched_target_idx.at(0)!);
+    const matchedlen = (matched_target_idx.at(-1)! - matched_target_idx.at(0)!) + 1;
 
     return Object.preventExtensions({
       Norm_avg_jarak_char : 1 - average/MaxDistance,
-      Proporsi_target_input : target.length / Math.max(1,matchedlen),
+      Proporsi_target_input : target.length / contain.length,
       case_similarity : similar_case/target.length,
       matched_idx : matched_target_idx
     });
@@ -128,18 +128,21 @@ export class TsukamotoFISPathfinding{
 
       const rules:Rules = [
         {
-          //jarakAntarKarakter=rendah dan kesamaanHurufbesarkecil=tinggi dan proporsiTargetbandingInput=tinggi(tinggi artinya hampir sama)
-          fireStrength: Math.min(rendah.Norm_avg_jarak_char,tinggi.case_similarity,tinggi.Proporsi_target_input),
+          //Rule 1: jarak antar karakter rapat  && case similar tinggi && proporsi target dengan input tinggi -> membership tinggi ( perfect case )
+          fireStrength: Math.min(tinggi.Norm_avg_jarak_char,tinggi.case_similarity,tinggi.Proporsi_target_input),
           out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
         },
         {
-          //jarakAntarKarakter=tinggi dan kesamaanHurufbesarkecil=rendah dan proporsiTargetbandingInput=rendah(rendah artinya targetInput lebih kecil)
-          fireStrength: Math.min(tinggi.Norm_avg_jarak_char,rendah.case_similarity,rendah.Proporsi_target_input),
+          //Rule 2 : jarak antar karakter renggang && case similarity rendah && proporsi target rendah -> membership rendah ( worst case )
+          fireStrength: Math.min(rendah.Norm_avg_jarak_char,rendah.case_similarity,rendah.Proporsi_target_input),
           out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.rendah
         },
         {
-          //jarakAntarKarakter=rendah atau proporsiTargetbandingInput=tinggi(tinggi artinya hampir sama)
-          fireStrength:Math.max(rendah.Norm_avg_jarak_char,tinggi.Proporsi_target_input),
+          // R3: jarak rapat atau case tinggi, (proporsi tinggi)
+          fireStrength:Math.min(
+            Math.max(tinggi.Norm_avg_jarak_char, tinggi.case_similarity),
+            tinggi.Proporsi_target_input  // ← hanya aktif kalau proporsi memang rendah
+          ),
           out_membership: TsukamotoFISPathfinding.out_membershipfx_akurasi.tinggi
         },
       ];
