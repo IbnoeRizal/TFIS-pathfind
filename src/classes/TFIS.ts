@@ -47,7 +47,7 @@ export class TsukamotoFISPathfinding{
   public async listFilesParallel(target:string,dir?: string) {
     dir = dir?.trim() ?? this.pathRoot;
     async function helper(target:string,dir:string,thisArg:TsukamotoFISPathfinding){
-      const entries = await fs.readdir(dir, { withFileTypes: true });
+      const entries = await fs.readdir(dir, { withFileTypes: true }).then(x=>x).catch(x=>[]);
       const pathlist: Array<Packed> = [];
       await Promise.all(
         entries.map(async (entry) => {
@@ -103,7 +103,7 @@ export class TsukamotoFISPathfinding{
     //penyebut harus lebih atau samadengan 1
     const penyebut = target.length -1 || 1;
     const average = pembilang/penyebut;
-    const matchedlen = (matched_target_idx.at(-1)! - matched_target_idx.at(0)!) + 1;
+    // const matchedlen = (matched_target_idx.at(-1)! - matched_target_idx.at(0)!) + 1;
 
     return Object.preventExtensions({
       Norm_avg_jarak_char : 1 - average/MaxDistance,
@@ -212,8 +212,18 @@ export class TsukamotoFISPathfinding{
 
   }
 
-  public getcopy(){
-    return this.pathlist.map(({rules,...rest})=>structuredClone(rest));
+  public getcopy(option?:{from:number,to:number}){
+    let pathlist = this.pathlist;
+
+    function anti_bufferoverflow(x:number){
+      return Math.max(0,Math.min(x,pathlist.length));
+    }
+    
+    let from = anti_bufferoverflow(option?.from ?? 0);
+    let to = anti_bufferoverflow(option?.to ?? from + 200);    
+
+
+    return pathlist.slice(from,to).map(({rules,...rest})=>structuredClone(rest));
   }
 
   private static matchup(target:string, raw:string): number[]{

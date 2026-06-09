@@ -11,6 +11,7 @@ import {
     useRef,
     useState,
     useEffect,
+    useMemo,
 } from "react";
 
 import {type PackedOutRules, TsukamotoFISPathfinding } from "../classes/TFIS.js";
@@ -26,51 +27,77 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
     const [error,setError] = useState<string | null>(null);
     const [pathList,setPathlist] = useState<PackedOutRules[] | string[] | []>([]);
     const [selectedIndex, setIndex] = useState(0);
+    const TFIS = useMemo(()=>new TsukamotoFISPathfinding(),[]);
+    const timer = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(()=>{
-        const timer = setTimeout(() => {
-            setError(null);
-        }, 3000);
+        if(timer.current)clearTimeout(timer.current);
+        timer.current = setTimeout(()=>setError(null),3000);
 
         if(!(query.base && query.path && query.path.length > 0)){
             setError("base path atau query tidak boleh kosong")
-            return ()=>clearTimeout(timer);
         };
-        const TFIS = new TsukamotoFISPathfinding();
 
-       (async()=>{
-        try {
-            setPathlist((await TFIS.listFilesParallel(query.path,query.base)).implication().defuzzyfication().ranking().getcopy());
-        } catch (err) {
-            const error = err as NodeJS.ErrnoException
-            if (error.code === 'ENOENT') {
-                setError(`Folder tidak ditemukan`);
-            } else if (error.code === 'EACCES') {
-                setError(`Akses ditolak`);
-            } else {
-                setError(`Error lainnya: ${ error.message}`);
+       query.base && query.path 
+       &&(async()=>{
+            
+            const result = (await TFIS.listFilesParallel(query.path,query.base))
+                .implication()
+                .defuzzyfication()
+                .ranking()
+                .getcopy()
+            
+
+            if(result.length === 0){
+                timer.current && clearTimeout(timer.current);
+                setError("tidak ditemukan file atau folder");
+                timer.current = setTimeout(()=>setError(null),3000);
+            }else{
+                setPathlist(result);
             }
-        }
-        return () => clearTimeout(timer)
-       })();
+        })();
     },[query.base,query.path]);
+
+    const renderedPathlist = useMemo(()=>{
+        const render = [];
+        for(const item of pathList){
+            if(typeof item === 'string') return null;
+
+            const matchedidx = new Set(item.kemiripan.matched_idx);
+            
+            render.push(
+                item.path.split("").map((char,i)=>
+                    matchedidx.has(i)?
+                    <Text key={i} bold color="yellowBright">{char}</Text>
+                    : <Text key={i}>{char}</Text>
+                )
+            )
+        }
+        
+        return render;
+    },[pathList]);
 
      // Handle keyboard navigation in the parent
     useInput((input, key) => {
         if(!pathListNode.isActive()) return;
 
-        if (input === MOVEMENT.ATAS) {
-            setIndex((prev) => Math.max(prev - 1, 0));
+        switch (input) {
+            case MOVEMENT.ATAS:
+                setIndex((prev) => Math.max(prev - 1, 0));
+                break;
+            case MOVEMENT.BAWAH:
+                setIndex((prev) => Math.min(prev + 1, pathList.length - 1));
+                break;
+            case MOVEMENT.TOP:
+                setIndex(0); // Jump to first
+                break;
+            case MOVEMENT.BOTTOM:
+                setIndex(pathList.length -1); // Jump to last
+                break;
+            default:
+                break;
         }
-        if (input === MOVEMENT.BAWAH) {
-            setIndex((prev) => Math.min(prev + 1, pathList.length - 1));
-        }
-        if (input === MOVEMENT.TOP) {
-            setIndex(0); // Jump to first
-        }
-        if (input === MOVEMENT.BOTTOM) {
-            setIndex(pathList.length - 1); // Jump to last
-        }
+
         if (key.return) {
             console.log(`Selected: ${pathList[selectedIndex]}`);
         }
@@ -99,11 +126,7 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
                         </Box>
                         )
                     }else{
-                        const matchedidx = new Set(item.kemiripan.matched_idx);
-                        const newpath = item.path.split("").map((char,i)=>matchedidx.has(i)
-                             ? <Text key={i} bold color="yellowBright">{char}</Text>
-                            : <Text key={i}>{char}</Text>
-                        )
+
                         const selected = i === selectedIndex;
                         const rank = item.crisp_out?.toFixed(0);
 
@@ -111,7 +134,7 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
                            <Box key={i} alignItems="center" justifyContent="space-between">
                             <Text color={selected ? "green" : "white"} wrap="truncate-middle">
                                 {i === selectedIndex ? "> " : "  "}
-                                {newpath}
+                                {renderedPathlist && renderedPathlist[i]}
                             </Text>
                             <Text color={selected ? "green" : "white"}>
                                {rank}
