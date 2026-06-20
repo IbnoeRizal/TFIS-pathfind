@@ -5,7 +5,7 @@ import {
  } from "ink";
 
 import { TextInput } from "@inkjs/ui";
-import { useCallback, useMemo } from "react";
+import { useCallback} from "react";
 import { useQuery } from "../context/querycontext.js";
 import { type QueryState } from "../context/querycontext.js";
 import { graphLayout } from "../utility/movement.js";

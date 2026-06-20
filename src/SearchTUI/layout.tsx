@@ -1,13 +1,10 @@
 import { 
 	Box,
 	Spacer,
-	useFocusManager,
 	useWindowSize,
-	useInput,
  } from "ink";
 
 import { 
-	MOVEMENT,
 	graphLayout 
  } from "../utility/movement.js";
 import Footer from "./footer.js";
