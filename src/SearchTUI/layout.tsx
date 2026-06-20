@@ -19,8 +19,9 @@ import { usePointer } from "../customHooks/pointer.js";
 
 
 export default function Layout(){
-	
+	//@ts-ignore  
 	const {columns,rows} = useWindowSize();
+	
 	const [query,setQuery] = useState({
 		base:"./",
 		path:""
@@ -35,6 +36,7 @@ export default function Layout(){
 		return [pathlist_node,query_node];
 	},[]);
 
+	//@ts-ignore this is required because layout and it's children has to update
 	const activeNode = usePointer(pathlist_node);
 
 
