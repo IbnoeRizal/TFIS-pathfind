@@ -57,7 +57,6 @@ export function usePointer(rootNode:graphLayout){
                 break;
         }
 
-        lastInput.current = input;
     })
 
     return node;
