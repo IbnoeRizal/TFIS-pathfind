@@ -59,7 +59,7 @@ export class TsukamotoFISPathfinding{
           let temp: Packed[] | undefined;
           if(isDirectory){
             temp = await helper(target,fullPath,thisArg);
-            pathlist.push(...temp)
+            for(const item of temp) pathlist.push(item);
           }
 
           if(typeof temp === 'undefined' || temp.length === 0){
