@@ -59,6 +59,8 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
                             <Text key={i} bold color="yellowBright">{char}</Text>
                             : <Text key={i}>{char}</Text>
                         )}
+                    </Text>
+                    <Text>
                         {item.crisp_out?.toFixed(2)}
                     </Text>
                 </Box> )
@@ -71,7 +73,7 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
         if(!item) return;
 
         const set_color = selected ? "green" : "black";
-        const set_prefix = selected ? ">  " : "   ";
+        const set_prefix = selected ? "> " : "  ";
 
         let temp:React.ReactNode;
         if(typeof item === 'string'){
@@ -92,6 +94,8 @@ export default function PathList({pathListNode}:{pathListNode:graphLayout}){
                         <Text key={i} bold color="yellowBright">{char}</Text>
                         : <Text key={i}>{char}</Text>
                     )}
+                </Text>
+                <Text>
                     {item.crisp_out?.toFixed(2)}
                 </Text>
             </Box> )
